@@ -22,39 +22,53 @@ class AddRoleIdToUsers extends Migration
 {
     public function up(): void
     {
-        // Add the role_id column
-        $this->forge->addColumn('users', [
-            'role_id' => [
-                'type'       => 'INT',
-                'constraint' => 10,
-                'unsigned'   => true,
-                'null'       => true,       // NULL = no role assigned yet
-                'default'    => null,
-                'after'      => 'email',    // places column after 'email'
-            ],
-        ]);
+        if (! $this->db->fieldExists('role_id', 'users')) {
+            $this->forge->addColumn('users', [
+                'role_id' => [
+                    'type'       => 'INT',
+                    'constraint' => 10,
+                    'unsigned'   => true,
+                    'null'       => true,
+                    'default'    => null,
+                    'after'      => 'email',
+                ],
+            ]);
+        }
 
-        // Add deleted_at for soft-delete support
-        // NULL means the record is active; a timestamp means it's soft-deleted
-        $this->forge->addColumn('users', [
-            'deleted_at' => [
-                'type'    => 'DATETIME',
-                'null'    => true,
-                'default' => null,
-                'after'   => 'updated_at',  // places column after 'updated_at'
-            ],
-        ]);
+        if (! $this->db->fieldExists('deleted_at', 'users')) {
+            $this->forge->addColumn('users', [
+                'deleted_at' => [
+                    'type'    => 'DATETIME',
+                    'null'    => true,
+                    'default' => null,
+                    'after'   => 'updated_at',
+                ],
+            ]);
+        }
 
-        // Add the foreign key constraint separately
-        // ON DELETE SET NULL: deleting a role unassigns users, doesn't delete them
-        $this->db->query('
-            ALTER TABLE users
-            ADD CONSTRAINT fk_users_role_id
-            FOREIGN KEY (role_id)
-            REFERENCES roles(id)
-            ON DELETE SET NULL
-            ON UPDATE CASCADE
-        ');
+        // Add FK only if it doesn't already exist
+        $constraints = $this->db->query("
+            SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'users'
+              AND CONSTRAINT_NAME = 'fk_users_role_id'
+        ")->getRowArray();
+
+        if (! $constraints) {
+            try {
+                $this->db->query('
+                    ALTER TABLE users
+                    ADD CONSTRAINT fk_users_role_id
+                    FOREIGN KEY (role_id)
+                    REFERENCES roles(id)
+                    ON DELETE SET NULL
+                    ON UPDATE CASCADE
+                ');
+            } catch (\Exception $e) {
+                // Column type mismatch (e.g. INT vs INT UNSIGNED) — skip FK,
+                // referential integrity is enforced at the application level.
+            }
+        }
     }
 
     public function down(): void

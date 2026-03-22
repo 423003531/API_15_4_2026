@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Api;
 
+use App\Models\ApiTokenModel;
 use App\Models\UserModel;
 
 /**
@@ -26,8 +27,8 @@ class AuthController extends BaseApiController
             return $this->badRequest('email and password are required.');
         }
 
-        $userModel = new UserModel();
-        $user      = $userModel->findByEmail($email);
+        $userModel  = new UserModel();
+        $user       = $userModel->findByEmail($email);
 
         if (! $user || ! password_verify($password, $user['password'])) {
             return $this->response
@@ -36,15 +37,10 @@ class AuthController extends BaseApiController
         }
 
         // Generate a cryptographically secure token
-        $token     = bin2hex(random_bytes(32));   // 64-char hex string
-        $expiresAt = date('Y-m-d H:i:s', time() + self::TOKEN_TTL);
+        $token          = bin2hex(random_bytes(32));   // 64-char hex string
+        $expiresAt      = date('Y-m-d H:i:s', time() + self::TOKEN_TTL);
 
-        db_connect()->table('api_tokens')->insert([
-            'user_id'    => $user['id'],
-            'token'      => $token,
-            'expires_at' => $expiresAt,
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
+        (new ApiTokenModel())->createToken($user['id'], $token, $expiresAt);
 
         return $this->created([
             'token'      => $token,
@@ -66,7 +62,7 @@ class AuthController extends BaseApiController
         $authHeader = $this->request->getHeaderLine('Authorization');
         $token      = trim(substr($authHeader, 7));
 
-        db_connect()->table('api_tokens')->where('token', $token)->delete();
+        (new ApiTokenModel())->deleteByToken($token);
 
         return $this->ok(null, 'Token revoked.');
     }

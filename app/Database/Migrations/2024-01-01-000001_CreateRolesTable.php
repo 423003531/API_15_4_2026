@@ -57,7 +57,7 @@ class CreateRolesTable extends Migration
         ]);
 
         $this->forge->addPrimaryKey('id');
-        $this->forge->createTable('roles');
+        $this->forge->createTable('roles', true); // IF NOT EXISTS
     }
 
     public function down(): void
