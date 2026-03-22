@@ -68447,3 +68447,59 @@
   },
 ]);
 //# sourceMappingURL=app.js.map
+
+// Profile Edit — live avatar preview
+function previewProfileImage(event) {
+  var file    = event.target.files[0];
+  var preview = document.getElementById('avatarPreview');
+  if (!file || !preview) return;
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    if (preview.tagName === 'DIV') {
+      var img       = document.createElement('img');
+      img.id        = 'avatarPreview';
+      img.src       = e.target.result;
+      img.className = 'profile-avatar-preview rounded-circle border border-3 border-primary shadow-sm';
+      img.alt       = 'Profile Preview';
+      preview.replaceWith(img);
+    } else {
+      preview.src = e.target.result;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// Student list — live search filter
+document.addEventListener('DOMContentLoaded', function () {
+  var searchInput = document.getElementById('studentSearch');
+  if (searchInput) {
+    searchInput.addEventListener('keyup', function () {
+      var q    = this.value.toLowerCase();
+      var rows = document.querySelectorAll('#studentTable tbody tr');
+      rows.forEach(function (row) {
+        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    });
+  }
+
+  // Role management — delete modal population
+  var deleteModal = document.getElementById('deleteModal');
+  if (deleteModal) {
+    deleteModal.addEventListener('show.bs.modal', function (e) {
+      var btn   = e.relatedTarget;
+      var id    = btn.dataset.id;
+      var label = btn.dataset.label;
+      var count = parseInt(btn.dataset.count);
+      document.getElementById('deleteRoleLabel').textContent = '"' + label + '"';
+      document.getElementById('deleteConfirmBtn').href = deleteModal.dataset.baseUrl + id;
+      var warn = document.getElementById('deleteWarning');
+      if (count > 0) {
+        warn.classList.remove('d-none');
+        document.getElementById('deleteWarningText').textContent =
+          count + ' user(s) currently have this role. They will be unassigned.';
+      } else {
+        warn.classList.add('d-none');
+      }
+    });
+  }
+});

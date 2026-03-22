@@ -6,6 +6,7 @@ class Home extends BaseController
 {
     public function index(): string
     {
+
         $data = array_merge($this->data, [
             'title'         => 'Dashboard Page'
         ]);

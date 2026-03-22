@@ -1,46 +1,104 @@
-<nav id="sidebar" class="sidebar js-sidebar">
-    <div class="sidebar-content js-simplebar">
-        <a class="sidebar-brand" href="<?= base_url(); ?> ">
-            <span class="align-middle"><i>Starter Panel</i></span>
-        </a>
-        <ul class="sidebar-nav">
-            <?php foreach ($MenuCategory as $mCategory) : ?>
-                <li class="sidebar-header">
-                    <?= $mCategory['menu_category']; ?>
-                </li>
-                <?php
-                $Menu = getMenu($mCategory['menuCategoryID'], $user['role']);
-                foreach ($Menu as $menu) :
-                    if ($menu['parent'] == 0) :
-                ?>
-                        <li class="sidebar-item <?= ($segment == $menu['url']) ? 'active' : ''; ?>">
-                            <a class="sidebar-link" href="<?= base_url($menu['url']); ?> ">
-                                <i class="align-middle" data-feather="<?= $menu['icon']; ?>"></i> <span class="align-middle"><?= $menu['title']; ?></span>
-                            </a>
-                        </li>
-                    <?php
-                    else :
-                        $SubMenu =  getSubMenu($menu['menu_id'], $user['role']);
-                    ?>
-                        <li class="sidebar-item <?= ($segment == $menu['url']) ? 'active' : ''; ?>">
-                            <a data-bs-target="#<?= $menu['url'] ?>" data-bs-toggle="collapse" class="sidebar-link collapsed" aria-expanded="<?= ($segment == $menu['url']) ? 'true' : 'false'; ?>">
-                                <i class="align-middle" data-feather="<?= $menu['icon']; ?>"></i> <span class="align-middle"><?= $menu['title']; ?></span>
-                            </a>
-                            <ul id="<?= $menu['url'] ?>" class="sidebar-dropdown list-unstyled collapse <?= ($segment == $menu['url']) ? ' show' : ''; ?> " data-bs-parent="#sidebar">
-                                <?php foreach ($SubMenu as $subMenu) : ?>
-                                    <li class="sidebar-item <?= ($subsegment == $subMenu['url']) ? 'active' : ''; ?>">
-                                        <a class="sidebar-link" href="<?= base_url($menu['url'] . '/' . $subMenu['url']); ?>">
-                                            <?= $subMenu['title']; ?>
-                                        </a>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </li>
-                <?php
-                    endif;
-                endforeach;
-                ?>
-            <?php endforeach; ?>
-        </ul>
-    </div>
-</nav>
+<!--begin::Sidebar-->
+<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+
+  <!--begin::Sidebar Brand-->
+  <div class="sidebar-brand">
+    <?php $role = session('user')['role'] ?? ''; ?>
+    <a href="<?= base_url($role === 'student' ? 'student/dashboard' : 'dashboard') ?>" class="brand-link">
+      <img src="<?= base_url('assets/images/AdminLTELogo.png') ?>"
+           alt="AdminLTE Logo"
+           class="brand-image opacity-75 shadow" />
+      <span class="brand-text fw-light">StarterPanel</span>
+    </a>
+  </div>
+  <!--end::Sidebar Brand-->
+
+  <!--begin::Sidebar Wrapper-->
+  <div class="sidebar-wrapper">
+    <nav class="mt-2">
+      <ul class="nav sidebar-menu flex-column"
+          data-lte-toggle="treeview"
+          role="navigation"
+          aria-label="Main navigation"
+          data-accordion="false">
+
+        <?php $role = session('user')['role'] ?? ''; ?>
+
+        <?php if ($role === 'student'): ?>
+        <!-- ── STUDENT MENU ── -->
+        <li class="nav-item">
+          <a href="<?= base_url('student/dashboard') ?>" class="nav-link">
+            <i class="nav-icon bi bi-speedometer2"></i>
+            <p>Dashboard</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="<?= base_url('profile') ?>" class="nav-link">
+            <i class="nav-icon bi bi-person-circle"></i>
+            <p>My Profile</p>
+          </a>
+        </li>
+
+        <?php elseif ($role === 'teacher'): ?>
+        <!-- ── TEACHER MENU ── -->
+        <li class="nav-item">
+          <a href="<?= base_url('dashboard') ?>" class="nav-link">
+            <i class="nav-icon bi bi-speedometer2"></i>
+            <p>Dashboard</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="<?= base_url('students') ?>" class="nav-link">
+            <i class="nav-icon bi bi-people"></i>
+            <p>Students</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="<?= base_url('profile') ?>" class="nav-link">
+            <i class="nav-icon bi bi-person-circle"></i>
+            <p>My Profile</p>
+          </a>
+        </li>
+
+        <?php elseif ($role === 'admin'): ?>
+        <!-- ── ADMIN MENU ── -->
+        <li class="nav-item">
+          <a href="<?= base_url('dashboard') ?>" class="nav-link">
+            <i class="nav-icon bi bi-speedometer2"></i>
+            <p>Dashboard</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="<?= base_url('students') ?>" class="nav-link">
+            <i class="nav-icon bi bi-people"></i>
+            <p>Students</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="<?= base_url('admin/roles') ?>" class="nav-link">
+            <i class="nav-icon bi bi-shield-lock"></i>
+            <p>Role Management</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="<?= base_url('admin/users') ?>" class="nav-link">
+            <i class="nav-icon bi bi-person-gear"></i>
+            <p>User Management</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="<?= base_url('profile') ?>" class="nav-link">
+            <i class="nav-icon bi bi-person-circle"></i>
+            <p>My Profile</p>
+          </a>
+        </li>
+
+        <?php endif; ?>
+
+      </ul>
+    </nav>
+  </div>
+  <!--end::Sidebar Wrapper-->
+
+</aside>
+<!--end::Sidebar-->

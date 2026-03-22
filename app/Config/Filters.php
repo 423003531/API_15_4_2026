@@ -1,30 +1,39 @@
 <?php
 
+// app/Config/Filters.php
+
 namespace Config;
 
-use CodeIgniter\Filters\Cors;
+use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Filters\CSRF;
-use App\Filters\Authorization;
-use App\Filters\Authentication;
-use CodeIgniter\Filters\Honeypot;
-use CodeIgniter\Filters\PageCache;
-use CodeIgniter\Filters\ForceHTTPS;
 use CodeIgniter\Filters\DebugToolbar;
+use CodeIgniter\Filters\Honeypot;
 use CodeIgniter\Filters\InvalidChars;
 use CodeIgniter\Filters\SecureHeaders;
-use CodeIgniter\Filters\PerformanceMetrics;
-use CodeIgniter\Config\Filters as BaseFilters;
 
-class Filters extends BaseFilters
+// ── Our custom filters ────────────────────────────────────────
+use App\Filters\AuthFilter;
+use App\Filters\StudentFilter;
+use App\Filters\TeacherFilter;
+use App\Filters\AdminFilter;
+use App\Filters\ApiAuthFilter;
+
+class Filters extends BaseConfig
 {
     /**
-     * Configures aliases for Filter classes to
-     * make reading things nicer and simpler.
+     * Filter aliases.
      *
-     * @var array<string, class-string|list<class-string>>
+     * The key is the alias used in Routes.php.
+     * The value is the fully-qualified class name.
      *
-     * [filter_name => classname]
-     * or [filter_name => [classname1, classname2, ...]]
+     * Naming convention:
+     *  'auth'    → must be logged in (any role)
+     *  'student' → must be logged in AND have role = 'student'
+     *  'teacher' → must be logged in AND have role IN ['teacher','admin']
+     *  'admin'   → must be logged in AND have role = 'admin'
+     *
+     * In Routes.php, filters are stacked:
+     *   ['filter' => 'auth|student']  means BOTH filters run in order.
      */
     public array $aliases = [
         'csrf'          => CSRF::class,
@@ -32,82 +41,27 @@ class Filters extends BaseFilters
         'honeypot'      => Honeypot::class,
         'invalidchars'  => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
-        'cors'          => Cors::class,
-        'forcehttps'    => ForceHTTPS::class,
-        'pagecache'     => PageCache::class,
-        'performance'   => PerformanceMetrics::class,
-        'isLoggedIn'    => Authentication::class,
-        'isGranted'     => Authorization::class,
+
+        // Custom RBAC filters
+        'auth'     => AuthFilter::class,
+        'student'  => StudentFilter::class,
+        'teacher'  => TeacherFilter::class,
+        'admin'    => AdminFilter::class,
+
+        // API Bearer-token filter
+        'api_auth' => ApiAuthFilter::class,
     ];
 
-    /**
-     * List of special required filters.
-     *
-     * The filters listed here are special. They are applied before and after
-     * other kinds of filters, and always applied even if a route does not exist.
-     *
-     * Filters set by default provide framework functionality. If removed,
-     * those functions will no longer work.
-     *
-     * @see https://codeigniter.com/user_guide/incoming/filters.html#provided-filters
-     *
-     * @var array{before: list<string>, after: list<string>}
-     */
     public array $required = [
-        'before' => [
-            'forcehttps', // Force Global Secure Requests
-            'pagecache',  // Web Page Caching
-        ],
-        'after' => [
-            'pagecache',   // Web Page Caching
-            'performance', // Performance Metrics
-            'toolbar',     // Debug Toolbar
-        ],
+        'before' => [],
+        'after'  => ['toolbar'],
     ];
 
-    /**
-     * List of filter aliases that are always
-     * applied before and after every request.
-     *
-     * @var array<string, array<string, array<string, string>>>|array<string, list<string>>
-     */
     public array $globals = [
-        'before' => [
-            'isLoggedIn' => ['except' => ['/', 'register', 'login']],
-            'isGranted'  => ['except' => ['/', 'register', 'login', 'logout', 'blocked']],
-            // 'honeypot',
-            // 'csrf',
-            // 'invalidchars',
-        ],
-        'after' => [
-            // 'honeypot',
-            // 'secureheaders',
-        ],
+        'before' => [],
+        'after'  => [],
     ];
 
-    /**
-     * List of filter aliases that works on a
-     * particular HTTP method (GET, POST, etc.).
-     *
-     * Example:
-     * 'POST' => ['foo', 'bar']
-     *
-     * If you use this, you should disable auto-routing because auto-routing
-     * permits any HTTP method to access a controller. Accessing the controller
-     * with a method you don't expect could bypass the filter.
-     *
-     * @var array<string, list<string>>
-     */
     public array $methods = [];
-
-    /**
-     * List of filter aliases that should run on any
-     * before or after URI patterns.
-     *
-     * Example:
-     * 'isLoggedIn' => ['before' => ['account/*', 'profiles/*']]
-     *
-     * @var array<string, array<string, list<string>>>
-     */
     public array $filters = [];
 }

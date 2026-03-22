@@ -1,41 +1,113 @@
 <?php
 
+// app/Config/Routes.php
+//
+// RBAC Route Organization:
+//   Public              → no filter
+//   Any logged-in user  → filter: 'auth'
+//   Student only        → filter: ['auth', 'student']
+//   Teacher + Admin     → filter: ['auth', 'teacher']
+//   Admin only          → filter: ['auth', 'admin']
+//
+// Filters stack as an array — CI4 4.5+ requires array syntax for multiple filters.
+// AuthFilter always runs first to confirm a session exists,
+// then the role filter checks the specific permission level.
+
 use CodeIgniter\Router\RouteCollection;
 
-/**
- * @var RouteCollection $routes
- */
-$routes->get('/', 'Auth::index');
-$routes->get('login', 'Auth::index');
-$routes->post('login', 'Auth::index');
-$routes->get('logout', 'Auth::logout');
-$routes->get('blocked', 'Auth::forbiddenPage');
-$routes->get('register', 'Auth::register');
-$routes->post('register', 'Auth::registration');
+/** @var RouteCollection $routes */
 
-$routes->get('dashboard', 'Home::index');
+// ════════════════════════════════════════════════════════════
+//  PUBLIC ROUTES — no authentication required
+// ════════════════════════════════════════════════════════════
+$routes->get('/',          'AuthController::login');
+$routes->get('/login',     'AuthController::login');
+$routes->post('/login',    'AuthController::loginProcess');
+$routes->get('/register',  'AuthController::register');
+$routes->post('/register', 'AuthController::registerProcess');
+$routes->get('/logout',    'AuthController::logout');
+$routes->get('/unauthorized', 'AuthController::unauthorized');
 
-// Setting Routes
-$routes->group('users', static function ($routes) {
-    $routes->get('/', 'Settings::users');
-    $routes->post('create-role', 'Settings::createRole');
-    $routes->post('update-role', 'Settings::updateRole');
-    $routes->delete('delete-role/(:num)', 'Settings::deleteRole/$1');
+// ════════════════════════════════════════════════════════════
+//  STUDENT ROUTES — role: student only
+// ════════════════════════════════════════════════════════════
+$routes->group('', ['filter' => ['auth', 'student']], function ($routes) {
 
-    $routes->get('role-access', 'Settings::roleAccess');
-    $routes->post('create-user', 'Settings::createUser');
-    $routes->post('update-user', 'Settings::updateUser');
-    $routes->delete('delete-user/(:num)', 'Settings::deleteUser/$1');
+    $routes->get('/student/dashboard', 'StudentController::dashboard');
+    $routes->get('/profile',           'ProfileController::show');
+    $routes->get('/profile/edit',      'ProfileController::edit');
+    $routes->post('/profile/update',   'ProfileController::update');
 
-    $routes->post('change-menu-permission', 'Settings::changeMenuPermission');
-    $routes->post('change-menu-category-permission', 'Settings::changeMenuCategoryPermission');
-    $routes->post('change-submenu-permission', 'Settings::changeSubMenuPermission');
 });
 
-$routes->group('menu-management', static function ($routes) {
-    $routes->get('/', 'Settings::menuManagement');
-    $routes->post('create-menu-category', 'Settings::createMenuCategory');
-    $routes->post('create-menu', 'Settings::createMenu');
-    $routes->post('create-submenu', 'Settings::createSubMenu');
+// ════════════════════════════════════════════════════════════
+//  TEACHER ROUTES — role: teacher OR admin
+//  TeacherFilter allows both roles
+// ════════════════════════════════════════════════════════════
+$routes->group('', ['filter' => ['auth', 'teacher']], function ($routes) {
+
+    $routes->get('/dashboard',            'Home::index');
+    $routes->get('/students',             'StudentManagementController::index');
+    $routes->get('/students/create',      'StudentInfo::create');
+    $routes->post('/students/store',      'StudentInfo::store');
+    $routes->get('/students/show/(:num)', 'StudentManagementController::show/$1');
+
 });
-$routes->get('menu','Menu::index');
+
+// ════════════════════════════════════════════════════════════
+//  ADMIN ROUTES — role: admin only
+// ════════════════════════════════════════════════════════════
+$routes->group('admin', ['filter' => ['auth', 'admin']], function ($routes) {
+
+    // Role Management
+    $routes->get('roles',                'Admin\RoleController::index');
+    $routes->get('roles/create',         'Admin\RoleController::create');
+    $routes->post('roles/store',         'Admin\RoleController::store');
+    $routes->get('roles/edit/(:num)',    'Admin\RoleController::edit/$1');
+    $routes->post('roles/update/(:num)', 'Admin\RoleController::update/$1');
+    $routes->get('roles/delete/(:num)',  'Admin\RoleController::delete/$1');
+
+    // User Role Assignment
+    $routes->get('users',                       'Admin\UserAdminController::index');
+    $routes->post('users/assign-role/(:num)',    'Admin\UserAdminController::assignRole/$1');
+
+});
+
+// ════════════════════════════════════════════════════════════
+//  API v1 — token-authenticated JSON endpoints
+//
+//  Public:    POST /api/v1/auth/token  (issue token)
+//  Protected: DELETE /api/v1/auth/token, GET /api/v1/students(/{id})
+//
+//  Header: Authorization: Bearer <token>
+// ════════════════════════════════════════════════════════════
+
+// Issue token — no auth filter needed here
+$routes->post('api/v1/auth/token', 'Api\AuthController::issueToken');
+
+// Protected API routes
+$routes->group('api/v1', ['filter' => 'api_auth'], function ($routes) {
+
+    // Auth
+    $routes->delete('auth/token', 'Api\AuthController::revokeToken');
+
+    // Students resource
+    $routes->get('students',       'Api\StudentsController::index');
+    $routes->get('students/(:num)', 'Api\StudentsController::show/$1');
+
+});
+
+// ════════════════════════════════════════════════════════════
+//  ITEMS CRUD — teacher + admin
+// ════════════════════════════════════════════════════════════
+$routes->group('', ['filter' => ['auth', 'teacher']], function ($routes) {
+
+    $routes->get('/items',                'ItemController::index');
+    $routes->get('/items/create',         'ItemController::create');
+    $routes->post('/items/store',         'ItemController::store');
+    $routes->get('/items/show/(:num)',    'ItemController::show/$1');
+    $routes->get('/items/edit/(:num)',    'ItemController::edit/$1');
+    $routes->post('/items/update/(:num)', 'ItemController::update/$1');
+    $routes->get('/items/delete/(:num)',  'ItemController::delete/$1');
+
+});

@@ -18,7 +18,9 @@ class Auth extends BaseController
         } else {
             $inputEmail     = htmlspecialchars($this->request->getVar('inputEmail', FILTER_UNSAFE_RAW));
             $inputPassword  = htmlspecialchars($this->request->getVar('inputPassword', FILTER_UNSAFE_RAW));
+
             $user           = $this->ApplicationModel->getUser(username: $inputEmail);
+            
             if ($user) {
                 $password        = $user['password'];
                 $verify = password_verify($inputPassword, $password);
@@ -39,6 +41,7 @@ class Auth extends BaseController
             }
         }
     }
+
     public function logout()
     {
         $this->session->destroy();
@@ -63,7 +66,7 @@ class Auth extends BaseController
         if (!$this->validate([
             'inputEmail'     => ['label' => 'Email', 'rules' => 'is_unique[users.username]'],
             'inputPassword'  => ['label' => 'Password', 'rules' => 'required'],
-            'inputPassword2' => ['label' => 'Password Confirmation', 'rules' => 'matches[inputPassword]'],
+            'inputPassword2' => ['label' => 'Password Confirmation', 'rules' => 'matches[inputPassword]']
         ])) {
             $data = array_merge($this->data, [
                 'title'         => 'Register Page',
@@ -75,15 +78,18 @@ class Auth extends BaseController
             $inputFullname = htmlspecialchars($this->request->getVar('inputFullname', FILTER_UNSAFE_RAW));
             $inputEmail    = htmlspecialchars($this->request->getVar('inputEmail', FILTER_UNSAFE_RAW));
             $inputPassword = htmlspecialchars($this->request->getVar('inputPassword', FILTER_UNSAFE_RAW));
+
             $dataUser      = [
                 'inputFullname' => $inputFullname,
                 'inputUsername' => $inputEmail,
                 'inputPassword' => $inputPassword,
                 'inputRole'     => 1
             ];
+
             $this->ApplicationModel->createUser($dataUser);
+
             session()->setFlashdata('notif_success', '<b>Registration Successfully!</b> Please login with your account.');
-            return view('pages/commons/login');
+            return view('pages/commons/login', $dataUser);
         }
     }
 }

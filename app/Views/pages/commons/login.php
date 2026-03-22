@@ -17,7 +17,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link href="<?= base_url('assets/css/app.css') ?>" rel="stylesheet">
 
-    <script src="<?= base_url('assets/js/app.js') ?>"></script>
 </head>
 
 <body>
@@ -60,6 +59,7 @@
             </div>
         </div>
     </main>
+    <script src="<?= base_url('assets/js/app.js') ?>"></script>
 </body>
 
 </html>
