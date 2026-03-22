@@ -4,9 +4,9 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
+use App\Models\ApplicationModel;
 
-class UserModel extends Model
+class UserModel extends ApplicationModel
 {
     protected $table      = 'users';
     protected $primaryKey = 'id';
@@ -19,9 +19,7 @@ class UserModel extends Model
 
     protected $allowedFields = [
         'name', 'email', 'password',
-        'role_id',          // ← new: foreign key to roles table
-        'student_id', 'student_display_id', 'course', 'year_level', 'section',
-        'phone', 'address', 'profile_image',
+        'role_id',
     ];
 
     protected $returnType = 'array';
@@ -38,6 +36,21 @@ class UserModel extends Model
     public function findByEmail(string $email): ?array
     {
         return $this->where('email', $email)->first();
+    }
+
+    /**
+     * Find a user by email with their role joined in one query.
+     * Used by AuthController::loginProcess().
+     */
+    public function findByEmailWithRole(string $email): ?array
+    {
+        return $this->db->table('users u')
+            ->select('u.*, r.name AS role_name')
+            ->join('roles r', 'r.id = u.role_id', 'left')
+            ->where('u.email', $email)
+            ->where('u.deleted_at IS NULL')
+            ->get()
+            ->getRowArray() ?: null;
     }
 
     /**

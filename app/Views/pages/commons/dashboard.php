@@ -1,5 +1,6 @@
 <?= $this->extend('layouts/main'); ?>
 <?= $this->section('content'); ?>
+<?= view('components/alerts') ?>
         <!--begin::App Content Header-->
         <div class="app-content-header">
           <!--begin::Container-->

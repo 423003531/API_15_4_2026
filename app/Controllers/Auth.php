@@ -16,8 +16,8 @@ class Auth extends BaseController
         if (!$this->validate(['inputEmail'  => 'required'])) {
             return view('pages/commons/login');
         } else {
-            $inputEmail     = htmlspecialchars($this->request->getVar('inputEmail', FILTER_UNSAFE_RAW));
-            $inputPassword  = htmlspecialchars($this->request->getVar('inputPassword', FILTER_UNSAFE_RAW));
+            $inputEmail     = $this->request->getVar('inputEmail', FILTER_UNSAFE_RAW);
+            $inputPassword  = $this->request->getVar('inputPassword', FILTER_UNSAFE_RAW);
 
             $user           = $this->ApplicationModel->getUser(username: $inputEmail);
             
@@ -75,9 +75,9 @@ class Auth extends BaseController
             session()->setFlashdata('notif_error', $this->validation->getError('inputPassword2') . ' ' . $this->validation->getError('inputEmail'));
             return view('pages/commons/register', $data);
         } else {
-            $inputFullname = htmlspecialchars($this->request->getVar('inputFullname', FILTER_UNSAFE_RAW));
-            $inputEmail    = htmlspecialchars($this->request->getVar('inputEmail', FILTER_UNSAFE_RAW));
-            $inputPassword = htmlspecialchars($this->request->getVar('inputPassword', FILTER_UNSAFE_RAW));
+            $inputFullname = $this->request->getVar('inputFullname', FILTER_UNSAFE_RAW);
+            $inputEmail    = $this->request->getVar('inputEmail', FILTER_UNSAFE_RAW);
+            $inputPassword = $this->request->getVar('inputPassword', FILTER_UNSAFE_RAW);
 
             $dataUser      = [
                 'inputFullname' => $inputFullname,

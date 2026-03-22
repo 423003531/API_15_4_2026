@@ -243,10 +243,14 @@ class Settings extends BaseController
         if ($createController && $createView) {
             $createMenu = $this->ApplicationModel->createMenu($this->request->getPost(null));
             if ($createMenu) {
-                $menuTitle          = $this->request->getPost('inputMenuURL');
-                $controllerName     = url_title(ucwords($menuTitle), '', false);
-                $route              = '$routes->get(\'' . $menuTitle . '\',\'' . $controllerName . '::index\');';
-                file_put_contents(APPPATH . 'Config/Routes.php', $route . PHP_EOL, FILE_APPEND | LOCK_EX);
+                $menuTitle      = $this->request->getPost('inputMenuURL');
+                $controllerName = url_title(ucwords($menuTitle), '', false);
+
+                // Only append the route if both values are safe alphanumeric slugs
+                if (preg_match('/^[a-zA-Z0-9\-]+$/', $menuTitle) && preg_match('/^[a-zA-Z0-9]+$/', $controllerName)) {
+                    $route = '$routes->get(\'' . $menuTitle . '\',\'' . $controllerName . '::index\');';
+                    file_put_contents(APPPATH . 'Config/Routes.php', $route . PHP_EOL, FILE_APPEND | LOCK_EX);
+                }
                 session()->setFlashdata('notif_success', '<b>Successfully create menu </b> ');
                 return redirect()->to(base_url('menu-management'));
             } else {
@@ -298,10 +302,16 @@ class Settings extends BaseController
 
     private function _createBlankPageController()
     {
-        $menuTitle          = ucwords($this->request->getPost('inputMenuURL'));
-        $controllerName     = url_title(ucwords($menuTitle), '', false);
-        $viewName           = url_title($menuTitle, '', true);
-        $controllerPath     = APPPATH . 'Controllers/' . $controllerName . ".php";
+        $menuTitle      = ucwords($this->request->getPost('inputMenuURL'));
+        $controllerName = url_title(ucwords($menuTitle), '', false);
+        $viewName       = url_title($menuTitle, '', true);
+
+        // Prevent path traversal — only allow plain alphanumeric controller names
+        if (! preg_match('/^[a-zA-Z0-9]+$/', $controllerName)) {
+            return false;
+        }
+
+        $controllerPath = APPPATH . 'Controllers/' . $controllerName . ".php";
         $controllerContent  = "<?php
 
 namespace App\Controllers;
@@ -329,8 +339,14 @@ class $controllerName extends BaseController
 
     private function _createBlankPageView()
     {
-        $viewName        = url_title($this->request->getPost('inputMenuURL'), '', true);
-        $viewPath        = APPPATH . 'Views/' . $viewName . ".php";
+        $viewName = url_title($this->request->getPost('inputMenuURL'), '', true);
+
+        // Prevent path traversal — only allow plain slugified view names
+        if (! preg_match('/^[a-z0-9\-]+$/', $viewName)) {
+            return false;
+        }
+
+        $viewPath = APPPATH . 'Views/' . $viewName . ".php";
         $viewContent     = "<?= $|this->extend('layouts/main'); ?>
 <?= $|this->section('content'); ?>
 <h1 class=\"h3 mb-3\"><strong><?= $|title; ?></strong> Menu </h1>

@@ -4,7 +4,7 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
+use App\Models\ApplicationModel;
 
 /**
  * RoleModel
@@ -13,7 +13,7 @@ use CodeIgniter\Model;
  * The 'name' column stores a slug (e.g. 'admin', 'teacher', 'student')
  * which is what Filters compare against session data.
  */
-class RoleModel extends Model
+class RoleModel extends ApplicationModel
 {
     protected $table      = 'roles';
     protected $primaryKey = 'id';

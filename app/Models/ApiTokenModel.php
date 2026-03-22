@@ -4,7 +4,8 @@ namespace App\Models;
 
 class ApiTokenModel extends ApplicationModel
 {
-    protected $table = 'api_tokens';
+    protected $table         = 'api_tokens';
+    protected $allowedFields = ['user_id', 'token', 'expires_at', 'created_at'];
 
     public function createToken(int $userId, string $token, string $expiresAt): void
     {

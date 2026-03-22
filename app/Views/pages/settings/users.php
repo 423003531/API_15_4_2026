@@ -1,5 +1,6 @@
 <?= $this->extend('layouts/main'); ?>
 <?= $this->section('content'); ?>
+<?= view('components/alerts') ?>
 <h1 class="h3 mb-3"><strong>Users</strong></h1>
 <div class="row">
     <div class="col-12 col-lg-8 col-xxl-8 d-flex">
@@ -22,9 +23,9 @@
                         <tbody>
                             <?php foreach ($Users as $users) : ?>
                                 <tr>
-                                    <td><?= $users['fullname']; ?></td>
-                                    <td class="d-none d-md-table-cell"><?= $users['username']; ?></td>
-                                    <td><span class="badge bg-success"><?= $users['role_name']; ?></span></td>
+                                    <td><?= esc($users['fullname']); ?></td>
+                                    <td class="d-none d-md-table-cell"><?= esc($users['username']); ?></td>
+                                    <td><span class="badge bg-success"><?= esc($users['role_name']); ?></span></td>
                                     <td><?= $users['created_at']; ?></td>
                                     <td>
                                         <button class="btn btn-info btn-sm btnEdit" data-bs-toggle="modal" data-bs-target="#formUserModal" data-id="<?= $users['userID']; ?>" data-fullname="<?= $users['fullname']; ?>" data-username="<?= $users['username']; ?>" data-role="<?= $users['role']; ?>">Update</button>
@@ -32,7 +33,7 @@
                                         <?php if ($users['username'] != session()->get('username')) : ?>
                                             <form action="<?= base_url('users/delete-user/' . $users['userID']); ?>" method="post" class="d-inline">
                                                 <input type="hidden" name="_method" value="DELETE">
-                                                <button class="btn btn-danger btn-sm" onclick="return confirm('Are you sure delete <?= $users['username']; ?> ?')">Delete</button>
+                                                <button class="btn btn-danger btn-sm" onclick="return confirm('Are you sure delete <?= esc($users['username'], 'js'); ?> ?')">Delete</button>
                                             </form>
                                         <?php endif; ?>
                                     </td>
@@ -61,7 +62,7 @@
                         <tbody>
                             <?php foreach ($UserRole as $userRole) : ?>
                                 <tr>
-                                    <td><?= $userRole['role_name']; ?></td>
+                                    <td><?= esc($userRole['role_name']); ?></td>
                                     <td><a href="<?= base_url('users/role-access?role=' . $userRole['id']); ?>"> <span class="badge bg-primary">Access Menu</span></a></td>
                                     <td>
                                         <button class="btn btn-info btn-sm btnEditRole" data-bs-toggle="modal" data-bs-target="#formRoleModal" data-id="<?= $userRole['id']; ?>" data-role="<?= $userRole['role_name']; ?>">Update</button>
@@ -88,48 +89,6 @@
 <?= $this->endSection(); ?>
 
 <?= $this->section('javascript'); ?>
-<script>
-    $(document).ready(function() {
-        $(".btnAdd").click(function() {
-            $('#formUserModalLabel').html('Create New User');
-            $('.modal-footer button[type=submit]').html('Save Role');
-            $('#userID').val('');
-            $('#inputFullname').val('');
-            $('#inputUsername').val('');
-            $('#inputRole').val('');
-        });
-        $(".btnEdit").click(function() {
-            const userId = $(this).data('id');
-            const fullname = $(this).data('fullname');
-            const username = $(this).data('username');
-            const role = $(this).data('role');
-            $('#modalTitle').html('form Data User');
-            $('.modal-footer button[type=submit]').html('Update User');
-            $('.modal-content form').attr('action', '<?= base_url('users/update-user') ?>');
-            $('#userID').val(userId);
-            $('#inputFullname').val(fullname);
-            $('#inputUsername').val(username);
-            $('#inputUsername').attr('readonly', true);
-            $('#inputPassword').attr('required', false);
-            $('#inputRole').val(role);
-        });
-
-        $(".btnAddRole").click(function() {
-            $('#formUserModalLabel').html('Create New Role');
-            $('.modal-content form').attr('action', '<?= base_url('users/create-role') ?>');
-            $('.modal-footer button[type=submit]').html('Save Role');
-            $('#roleID').val('');
-            $('#inputRoleName').val('');
-        });
-        $(".btnEditRole").click(function() {
-            const roleID = $(this).data('id');
-            const inputRoleName = $(this).data('role');
-            $('#modalTitle').html('Update Data Role');
-            $('.modal-footer button[type=submit]').html('Update role');
-            $('.modal-content form').attr('action', '<?= base_url('users/update-role') ?>');
-            $('#roleID').val(roleID);
-            $('#inputRoleName').val(inputRoleName);
-        });
-    });
-</script>
+<script>const baseUrl = '<?= base_url() ?>';</script>
+<script src="<?= base_url('assets/js/users-settings.js') ?>"></script>
 <?= $this->endSection(); ?>

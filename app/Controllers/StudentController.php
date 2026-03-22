@@ -4,7 +4,7 @@
 
 namespace App\Controllers;
 
-use App\Models\StudentInfoModel;
+use App\Models\UserModel;
 
 /**
  * StudentController
@@ -16,11 +16,10 @@ class StudentController extends BaseController
 {
     public function dashboard()
     {
-        $userId   = session('user')['id'];
-        $studentInfoModel = new StudentInfoModel();
+        $userId = session('user')['id'];
 
         // Load full profile so dashboard can display student details
-        $user = $studentInfoModel->getAllWithRoles($userId);
+        $user = (new UserModel())->getStudentById($userId);
 
         return view('student/dashboard', ['user' => $user]);
     }

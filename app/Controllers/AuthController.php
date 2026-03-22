@@ -4,6 +4,7 @@
 
 namespace App\Controllers;
 
+use App\Models\RoleModel;
 use App\Models\UserModel;
 
 class AuthController extends BaseController
@@ -30,15 +31,7 @@ class AuthController extends BaseController
                              ->with('errors', $this->validator->getErrors());
         }
 
-        // Join with roles to get role.name in one query
-        $user = $userModel->findWithRole(0); // placeholder — use raw below
-
-        $found = $userModel->db->table('users u')
-            ->select('u.*, r.name AS role_name')
-            ->join('roles r', 'r.id = u.role_id', 'left')
-            ->where('u.email', $this->request->getPost('email'))
-            ->where('u.deleted_at IS NULL')
-            ->get()->getRowArray();
+        $found = $userModel->findByEmailWithRole($this->request->getPost('email'));
 
         if (! $found || ! password_verify($this->request->getPost('password'), $found['password'])) {
             return redirect()->back()->withInput()
@@ -97,8 +90,7 @@ class AuthController extends BaseController
         }
 
         // Get the student role ID (new registrations default to student)
-        $studentRole = $userModel->db->table('roles')
-            ->where('name', 'student')->get()->getRowArray();
+        $studentRole = (new RoleModel())->findByName('student');
 
         $userModel->insert([
             'name'     => $this->request->getPost('name'),

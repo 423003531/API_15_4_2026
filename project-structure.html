@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CI4-StarterPanel — Project Structure</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3250;
+    --text: #e2e8f0;
+    --muted: #7b8db0;
+    --accent: #6366f1;
+    --accent2: #818cf8;
+
+    --c-controller: #38bdf8;
+    --c-model:       #34d399;
+    --c-view:        #f9a8d4;
+    --c-filter:      #fbbf24;
+    --c-migration:   #c084fc;
+    --c-config:      #94a3b8;
+    --c-helper:      #fb923c;
+    --c-seed:        #a78bfa;
+    --c-api:         #22d3ee;
+    --c-public:      #4ade80;
+    --c-folder:      #e2e8f0;
+    --c-file:        #94a3b8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .logo {
+    background: linear-gradient(135deg, var(--accent), var(--c-controller));
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    letter-spacing: .5px;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  #search {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 7px 12px 7px 34px;
+    font-size: 13px;
+    width: 220px;
+    outline: none;
+    transition: border-color .2s;
+  }
+
+  #search:focus { border-color: var(--accent); }
+  #search::placeholder { color: var(--muted); }
+
+  .btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { background: var(--border); border-color: var(--accent); }
+
+  .legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 12px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    opacity: 1;
+    transition: opacity .15s;
+  }
+
+  .legend-item.hidden { opacity: .35; }
+
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .stats-bar {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    flex: 1;
+    min-width: 110px;
+    text-align: center;
+  }
+
+  .stat-card .num {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--accent2);
+    line-height: 1;
+  }
+
+  .stat-card .lbl {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+
+  .tree-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 12px;
+    overflow: auto;
+  }
+
+  ul.tree { list-style: none; padding-left: 0; }
+  ul.tree ul { padding-left: 22px; }
+
+  li.tree-item { margin: 1px 0; }
+
+  .node {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background .12s;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .node:hover { background: var(--surface2); }
+
+  .node.matched-node {
+    background: rgba(99, 102, 241, .18);
+    outline: 1px solid var(--accent);
+  }
+
+  .node.hidden-node { display: none; }
+
+  .chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    transition: transform .18s;
+    color: var(--muted);
+  }
+
+  .chevron.open { transform: rotate(90deg); }
+  .chevron-placeholder { width: 16px; flex-shrink: 0; }
+
+  .icon { font-size: 15px; flex-shrink: 0; }
+
+  .node-name {
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .node-name.folder-name { color: var(--c-folder); font-weight: 600; }
+
+  .badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 99px;
+    font-weight: 600;
+    margin-left: 4px;
+    opacity: .85;
+  }
+
+  .count-badge {
+    font-size: 10px;
+    color: var(--muted);
+    margin-left: auto;
+    padding-right: 4px;
+  }
+
+  .children { display: block; }
+  .children.collapsed { display: none; }
+
+  .no-results {
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 32px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">CI4</div>
+  </div>
+  <div>
+    <h1>CI4-StarterPanel</h1>
+    <div class="subtitle">CodeIgniter 4 · MVC File &amp; Module Structure Tree</div>
+  </div>
+  <div class="controls">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input id="search" type="text" placeholder="Search files…">
+    </div>
+    <button class="btn" onclick="expandAll()">Expand All</button>
+    <button class="btn" onclick="collapseAll()">Collapse All</button>
+  </div>
+</header>
+
+<div class="legend" id="legend">
+  <span style="font-size:12px;color:var(--muted);align-self:center;margin-right:6px;">Filter by type:</span>
+  <div class="legend-item" data-type="controller" onclick="toggleType('controller')">
+    <div class="dot" style="background:var(--c-controller)"></div> Controller
+  </div>
+  <div class="legend-item" data-type="model" onclick="toggleType('model')">
+    <div class="dot" style="background:var(--c-model)"></div> Model
+  </div>
+  <div class="legend-item" data-type="view" onclick="toggleType('view')">
+    <div class="dot" style="background:var(--c-view)"></div> View
+  </div>
+  <div class="legend-item" data-type="filter" onclick="toggleType('filter')">
+    <div class="dot" style="background:var(--c-filter)"></div> Filter
+  </div>
+  <div class="legend-item" data-type="migration" onclick="toggleType('migration')">
+    <div class="dot" style="background:var(--c-migration)"></div> Migration
+  </div>
+  <div class="legend-item" data-type="config" onclick="toggleType('config')">
+    <div class="dot" style="background:var(--c-config)"></div> Config
+  </div>
+  <div class="legend-item" data-type="helper" onclick="toggleType('helper')">
+    <div class="dot" style="background:var(--c-helper)"></div> Helper
+  </div>
+  <div class="legend-item" data-type="seed" onclick="toggleType('seed')">
+    <div class="dot" style="background:var(--c-seed)"></div> Seed
+  </div>
+  <div class="legend-item" data-type="api" onclick="toggleType('api')">
+    <div class="dot" style="background:var(--c-api)"></div> API
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-card"><div class="num">9</div><div class="lbl">Controllers</div></div>
+  <div class="stat-card"><div class="num">5</div><div class="lbl">Models</div></div>
+  <div class="stat-card"><div class="num">27</div><div class="lbl">Views</div></div>
+  <div class="stat-card"><div class="num">7</div><div class="lbl">Filters</div></div>
+  <div class="stat-card"><div class="num">6</div><div class="lbl">Migrations</div></div>
+  <div class="stat-card"><div class="num">5</div><div class="lbl">Seeds</div></div>
+  <div class="stat-card"><div class="num">3</div><div class="lbl">API Files</div></div>
+</div>
+
+<div class="tree-wrap">
+  <div class="no-results" id="noResults">No files match your search.</div>
+  <ul class="tree" id="treeRoot"></ul>
+</div>
+
+<script>
+// ─── Tree Data ─────────────────────────────────────────────────────────────
+const TREE = [
+  { name: "CI4-StarterPanel", type: "root", icon: "🗂️", children: [
+
+    { name: "app", type: "folder", icon: "📁", children: [
+
+      { name: "Commands", type: "folder", icon: "📁", children: [
+        { name: "MigrateFileCommand.php", type: "config", icon: "⚙️", badge: "Command" }
+      ]},
+
+      { name: "Config", type: "folder", icon: "📁", children: [
+        { name: "App.php",            type: "config", icon: "⚙️" },
+        { name: "Autoload.php",       type: "config", icon: "⚙️" },
+        { name: "Database.php",       type: "config", icon: "⚙️" },
+        { name: "Filters.php",        type: "config", icon: "⚙️" },
+        { name: "Routes.php",         type: "config", icon: "⚙️", badge: "Routes" },
+        { name: "Security.php",       type: "config", icon: "⚙️" },
+        { name: "Session.php",        type: "config", icon: "⚙️" },
+        { name: "Validation.php",     type: "config", icon: "⚙️" },
+        { name: "Services.php",       type: "config", icon: "⚙️" },
+        { name: "Email.php",          type: "config", icon: "⚙️" },
+        { name: "…(+26 more)",        type: "config", icon: "⚙️" }
+      ]},
+
+      { name: "Controllers", type: "folder", icon: "📁", children: [
+        { name: "BaseController.php",           type: "controller", icon: "🎮", badge: "Base" },
+        { name: "Auth.php",                     type: "controller", icon: "🎮", badge: "Controller" },
+        { name: "AuthController.php",           type: "controller", icon: "🎮", badge: "Controller" },
+        { name: "Home.php",                     type: "controller", icon: "🎮", badge: "Controller" },
+        { name: "ProfileController.php",        type: "controller", icon: "🎮", badge: "Controller" },
+        { name: "Settings.php",                 type: "controller", icon: "🎮", badge: "Controller" },
+        { name: "StudentController.php",        type: "controller", icon: "🎮", badge: "Controller" },
+        { name: "StudentInfo.php",              type: "controller", icon: "🎮", badge: "Controller" },
+        { name: "StudentManagementController.php", type: "controller", icon: "🎮", badge: "Controller" },
+        { name: "Admin", type: "folder", icon: "📁", children: [
+          { name: "RoleController.php",         type: "controller", icon: "🎮", badge: "Admin" },
+          { name: "UserAdminController.php",    type: "controller", icon: "🎮", badge: "Admin" }
+        ]},
+        { name: "Api", type: "folder", icon: "📁", children: [
+          { name: "BaseApiController.php",      type: "api", icon: "🔌", badge: "API" },
+          { name: "AuthController.php",         type: "api", icon: "🔌", badge: "API" },
+          { name: "StudentsController.php",     type: "api", icon: "🔌", badge: "API" }
+        ]}
+      ]},
+
+      { name: "Database", type: "folder", icon: "📁", children: [
+        { name: "Migrations", type: "folder", icon: "📁", children: [
+          { name: "2024-01-01-000001_CreateRolesTable.php",  type: "migration", icon: "🗄️" },
+          { name: "2024-01-01-000002_AddRoleIdToUsers.php",  type: "migration", icon: "🗄️" },
+          { name: "2025-06-15-113925_Session.php",           type: "migration", icon: "🗄️" },
+          { name: "2025-06-15-114014_UserManagement.php",    type: "migration", icon: "🗄️" },
+          { name: "2026-02-21-023605_Students.php",          type: "migration", icon: "🗄️" },
+          { name: "2026-03-20-000001_ApiTokens.php",         type: "migration", icon: "🗄️" }
+        ]},
+        { name: "Seeds", type: "folder", icon: "📁", children: [
+          { name: "MainSeeder.php",             type: "seed", icon: "🌱" },
+          { name: "RoleSeeder.php",             type: "seed", icon: "🌱" },
+          { name: "UserSeeder.php",             type: "seed", icon: "🌱" },
+          { name: "Users.php",                  type: "seed", icon: "🌱" },
+          { name: "StudentSeeder.php",          type: "seed", icon: "🌱" }
+        ]}
+      ]},
+
+      { name: "Filters", type: "folder", icon: "📁", children: [
+        { name: "Authentication.php",   type: "filter", icon: "🔒", badge: "Auth" },
+        { name: "Authorization.php",    type: "filter", icon: "🔒", badge: "Auth" },
+        { name: "AdminFilter.php",      type: "filter", icon: "🔒", badge: "Role" },
+        { name: "AuthFilter.php",       type: "filter", icon: "🔒", badge: "Role" },
+        { name: "StudentFilter.php",    type: "filter", icon: "🔒", badge: "Role" },
+        { name: "TeacherFilter.php",    type: "filter", icon: "🔒", badge: "Role" },
+        { name: "ApiAuthFilter.php",    type: "filter", icon: "🔒", badge: "API" }
+      ]},
+
+      { name: "Helpers", type: "folder", icon: "📁", children: [
+        { name: "menu_helper.php",       type: "helper", icon: "🔧" },
+        { name: "useraccess_helper.php", type: "helper", icon: "🔧" }
+      ]},
+
+      { name: "Models", type: "folder", icon: "📁", children: [
+        { name: "ApplicationModel.php",  type: "model", icon: "🗃️", badge: "Base" },
+        { name: "UserModel.php",         type: "model", icon: "🗃️" },
+        { name: "RoleModel.php",         type: "model", icon: "🗃️" },
+        { name: "StudentInfoModel.php",  type: "model", icon: "🗃️" },
+        { name: "ApiTokenModel.php",     type: "model", icon: "🗃️", badge: "API" }
+      ]},
+
+      { name: "Views", type: "folder", icon: "📁", children: [
+        { name: "layouts", type: "folder", icon: "📁", children: [
+          { name: "main.php",    type: "view", icon: "🖼️", badge: "Layout" },
+          { name: "header.php",  type: "view", icon: "🖼️", badge: "Layout" },
+          { name: "footer.php",  type: "view", icon: "🖼️", badge: "Layout" },
+          { name: "sidebar.php", type: "view", icon: "🖼️", badge: "Layout" }
+        ]},
+        { name: "pages", type: "folder", icon: "📁", children: [
+          { name: "commons", type: "folder", icon: "📁", children: [
+            { name: "dashboard.php",    type: "view", icon: "🖼️" },
+            { name: "login.php",        type: "view", icon: "🖼️" },
+            { name: "register.php",     type: "view", icon: "🖼️" },
+            { name: "forbidden.php",    type: "view", icon: "🖼️" },
+            { name: "student_view.php", type: "view", icon: "🖼️" },
+            { name: "studentview.php",  type: "view", icon: "🖼️" },
+            { name: "javascripts.php",  type: "view", icon: "🖼️" }
+          ]},
+          { name: "settings", type: "folder", icon: "📁", children: [
+            { name: "menu_management.php", type: "view", icon: "🖼️" },
+            { name: "role_access.php",     type: "view", icon: "🖼️" },
+            { name: "users.php",           type: "view", icon: "🖼️" }
+          ]}
+        ]},
+        { name: "admin", type: "folder", icon: "📁", children: [
+          { name: "roles", type: "folder", icon: "📁", children: [
+            { name: "index.php",  type: "view", icon: "🖼️" },
+            { name: "create.php", type: "view", icon: "🖼️" },
+            { name: "edit.php",   type: "view", icon: "🖼️" }
+          ]},
+          { name: "users", type: "folder", icon: "📁", children: [
+            { name: "index.php",  type: "view", icon: "🖼️" }
+          ]}
+        ]},
+        { name: "auth", type: "folder", icon: "📁", children: [
+          { name: "dashboard.php",   type: "view", icon: "🖼️" },
+          { name: "login.php",       type: "view", icon: "🖼️" },
+          { name: "register.php",    type: "view", icon: "🖼️" },
+          { name: "javascripts.php", type: "view", icon: "🖼️" }
+        ]},
+        { name: "profile", type: "folder", icon: "📁", children: [
+          { name: "show.php", type: "view", icon: "🖼️" },
+          { name: "edit.php", type: "view", icon: "🖼️" }
+        ]},
+        { name: "student", type: "folder", icon: "📁", children: [
+          { name: "dashboard.php", type: "view", icon: "🖼️" }
+        ]},
+        { name: "teacher", type: "folder", icon: "📁", children: [
+          { name: "students.php",       type: "view", icon: "🖼️" },
+          { name: "student_create.php", type: "view", icon: "🖼️" },
+          { name: "student_show.php",   type: "view", icon: "🖼️" }
+        ]},
+        { name: "components", type: "folder", icon: "📁", children: [
+          { name: "alerts.php", type: "view", icon: "🖼️", badge: "Component" }
+        ]},
+        { name: "widgets", type: "folder", icon: "📁", children: [
+          { name: "users", type: "folder", icon: "📁", children: [
+            { name: "role_form_modal.php", type: "view", icon: "🖼️", badge: "Widget" },
+            { name: "user_form_modal.php", type: "view", icon: "🖼️", badge: "Widget" }
+          ]}
+        ]},
+        { name: "errors", type: "folder", icon: "📁", children: [
+          { name: "html", type: "folder", icon: "📁", children: [
+            { name: "error_400.php",       type: "view", icon: "🖼️" },
+            { name: "error_404.php",       type: "view", icon: "🖼️" },
+            { name: "error_exception.php", type: "view", icon: "🖼️" },
+            { name: "production.php",      type: "view", icon: "🖼️" }
+          ]},
+          { name: "unauthorized.php", type: "view", icon: "🖼️" }
+        ]}
+      ]},
+
+      { name: "Language", type: "folder", icon: "📁", children: [
+        { name: "en", type: "folder", icon: "📁", children: [
+          { name: "Validation.php", type: "config", icon: "⚙️" }
+        ]}
+      ]},
+
+      { name: "Common.php", type: "config", icon: "⚙️" }
+    ]},
+
+    { name: "public", type: "folder", icon: "📁", children: [
+      { name: "index.php",    type: "config", icon: "⚙️", badge: "Entry Point" },
+      { name: "assets",       type: "folder", icon: "📁", children: [
+        { name: "css", type: "folder", icon: "📁", children: [
+          { name: "adminlte.css",     type: "file", icon: "🎨" },
+          { name: "adminlte.min.css", type: "file", icon: "🎨" },
+          { name: "app.css",          type: "file", icon: "🎨" }
+        ]},
+        { name: "js", type: "folder", icon: "📁", children: [
+          { name: "adminlte.js",     type: "file", icon: "📜" },
+          { name: "adminlte.min.js", type: "file", icon: "📜" },
+          { name: "app.js",          type: "file", icon: "📜" }
+        ]},
+        { name: "images", type: "folder", icon: "📁", children: [
+          { name: "avatar.png",  type: "file", icon: "🖼️" },
+          { name: "…(+20 more)", type: "file", icon: "🖼️" }
+        ]}
+      ]},
+      { name: "uploads", type: "folder", icon: "📁", children: [
+        { name: "profiles", type: "folder", icon: "📁", children: [
+          { name: "avatar_9_*.webp (×8)", type: "file", icon: "🖼️" }
+        ]}
+      ]}
+    ]},
+
+    { name: ".claude / skills", type: "folder", icon: "📁", children: [
+      { name: "backend/SKILL.md",        type: "config", icon: "📋", badge: "Skill" },
+      { name: "mvc-check/SKILL.md",      type: "config", icon: "📋", badge: "Skill" },
+      { name: "ui-build/SKILL.md",       type: "config", icon: "📋", badge: "Skill" },
+      { name: "skills-builder/SKILL.md", type: "config", icon: "📋", badge: "Skill" }
+    ]},
+
+    { name: ".env",        type: "config", icon: "🔑", badge: "Env" },
+    { name: "CLAUDE.md",   type: "config", icon: "📋", badge: "Project Guide" }
+  ]}
+];
+
+// ─── Type Colors ───────────────────────────────────────────────────────────
+const TYPE_COLORS = {
+  controller: 'var(--c-controller)',
+  model:      'var(--c-model)',
+  view:       'var(--c-view)',
+  filter:     'var(--c-filter)',
+  migration:  'var(--c-migration)',
+  config:     'var(--c-config)',
+  helper:     'var(--c-helper)',
+  seed:       'var(--c-seed)',
+  api:        'var(--c-api)',
+  file:       'var(--c-file)',
+  folder:     'var(--c-folder)',
+  root:       'var(--c-folder)',
+};
+
+const TYPE_BG = {
+  controller: 'rgba(56,189,248,.15)',
+  model:      'rgba(52,211,153,.15)',
+  view:       'rgba(249,168,212,.15)',
+  filter:     'rgba(251,191,36,.15)',
+  migration:  'rgba(192,132,252,.15)',
+  config:     'rgba(148,163,184,.15)',
+  helper:     'rgba(251,146,60,.15)',
+  seed:       'rgba(167,139,250,.15)',
+  api:        'rgba(34,211,238,.15)',
+};
+
+let hiddenTypes = new Set();
+
+// ─── Render Tree ───────────────────────────────────────────────────────────
+function renderTree(nodes, parentEl, depth = 0) {
+  nodes.forEach(node => {
+    const li = document.createElement('li');
+    li.className = 'tree-item';
+    li.dataset.type = node.type;
+    li.dataset.name = node.name.toLowerCase();
+
+    const nodeDiv = document.createElement('div');
+    nodeDiv.className = 'node';
+
+    const hasChildren = node.children && node.children.length > 0;
+    const isFolder = node.type === 'folder' || node.type === 'root';
+
+    // Chevron
+    if (hasChildren) {
+      const ch = document.createElement('span');
+      ch.className = 'chevron' + (depth < 2 ? ' open' : '');
+      ch.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`;
+      nodeDiv.appendChild(ch);
+    } else {
+      const ph = document.createElement('span');
+      ph.className = 'chevron-placeholder';
+      nodeDiv.appendChild(ph);
+    }
+
+    // Icon
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'icon';
+    iconSpan.textContent = node.icon;
+    nodeDiv.appendChild(iconSpan);
+
+    // Name
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'node-name' + (isFolder ? ' folder-name' : '');
+    nameSpan.style.color = !isFolder ? TYPE_COLORS[node.type] || 'var(--c-file)' : '';
+    nameSpan.textContent = node.name;
+    nodeDiv.appendChild(nameSpan);
+
+    // Badge
+    if (node.badge) {
+      const b = document.createElement('span');
+      b.className = 'badge';
+      b.textContent = node.badge;
+      b.style.background = TYPE_BG[node.type] || 'rgba(148,163,184,.15)';
+      b.style.color = TYPE_COLORS[node.type] || 'var(--c-file)';
+      nodeDiv.appendChild(b);
+    }
+
+    // Child count
+    if (hasChildren) {
+      const cc = document.createElement('span');
+      cc.className = 'count-badge';
+      cc.textContent = node.children.length + (node.children.length === 1 ? ' item' : ' items');
+      nodeDiv.appendChild(cc);
+    }
+
+    li.appendChild(nodeDiv);
+
+    // Children
+    if (hasChildren) {
+      const ul = document.createElement('ul');
+      ul.className = 'tree children' + (depth < 2 ? '' : ' collapsed');
+      renderTree(node.children, ul, depth + 1);
+      li.appendChild(ul);
+
+      nodeDiv.addEventListener('click', () => {
+        const ch = nodeDiv.querySelector('.chevron');
+        ch.classList.toggle('open');
+        ul.classList.toggle('collapsed');
+      });
+    }
+
+    parentEl.appendChild(li);
+  });
+}
+
+// ─── Search ────────────────────────────────────────────────────────────────
+let searchTimeout;
+document.getElementById('search').addEventListener('input', function () {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => doSearch(this.value.trim().toLowerCase()), 120);
+});
+
+function doSearch(query) {
+  const allNodes = document.querySelectorAll('.node');
+  const allLi = document.querySelectorAll('.tree-item');
+  const allChildren = document.querySelectorAll('.children');
+
+  if (!query) {
+    allNodes.forEach(n => n.classList.remove('matched-node', 'hidden-node'));
+    allLi.forEach(l => l.style.display = '');
+    allChildren.forEach(c => {
+      if (!c.closest('li').dataset.depth > 2) c.classList.remove('collapsed');
+    });
+    document.getElementById('noResults').style.display = 'none';
+    applyTypeFilter();
+    return;
+  }
+
+  // expand everything
+  allChildren.forEach(c => c.classList.remove('collapsed'));
+
+  let matched = 0;
+  allLi.forEach(li => {
+    const name = li.dataset.name || '';
+    if (name.includes(query)) {
+      li.style.display = '';
+      li.querySelector('.node').classList.add('matched-node');
+      li.querySelector('.node').classList.remove('hidden-node');
+      matched++;
+      // show all ancestors
+      let parent = li.parentElement;
+      while (parent && parent.id !== 'treeRoot') {
+        if (parent.tagName === 'LI') parent.style.display = '';
+        parent = parent.parentElement;
+      }
+    } else {
+      li.style.display = 'none';
+      li.querySelector('.node').classList.remove('matched-node');
+    }
+  });
+
+  document.getElementById('noResults').style.display = matched === 0 ? 'block' : 'none';
+}
+
+// ─── Type Filter ───────────────────────────────────────────────────────────
+function toggleType(type) {
+  if (hiddenTypes.has(type)) {
+    hiddenTypes.delete(type);
+    document.querySelector(`[data-type="${type}"]`).classList.remove('hidden');
+  } else {
+    hiddenTypes.add(type);
+    document.querySelector(`[data-type="${type}"]`).classList.add('hidden');
+  }
+  applyTypeFilter();
+}
+
+function applyTypeFilter() {
+  document.querySelectorAll('.tree-item').forEach(li => {
+    if (hiddenTypes.has(li.dataset.type)) {
+      li.style.display = 'none';
+    } else {
+      li.style.display = '';
+    }
+  });
+}
+
+// ─── Expand / Collapse All ─────────────────────────────────────────────────
+function expandAll() {
+  document.querySelectorAll('.children').forEach(c => c.classList.remove('collapsed'));
+  document.querySelectorAll('.chevron').forEach(c => c.classList.add('open'));
+}
+
+function collapseAll() {
+  document.querySelectorAll('.children').forEach(c => c.classList.add('collapsed'));
+  document.querySelectorAll('.chevron').forEach(c => c.classList.remove('open'));
+}
+
+// ─── Init ──────────────────────────────────────────────────────────────────
+const root = document.getElementById('treeRoot');
+renderTree(TREE, root, 0);
+</script>
+</body>
+</html>

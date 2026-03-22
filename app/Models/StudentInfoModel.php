@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
+use App\Models\ApplicationModel;
 
-class StudentInfoModel extends Model
+class StudentInfoModel extends ApplicationModel
 {
     protected $table            = 'students';
     protected $primaryKey       = 'id';
@@ -13,9 +13,6 @@ class StudentInfoModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields = [
-        'name',
-        'email',
-        'password',
         'student_id',
         'student_display_id',
         'course',
@@ -60,29 +57,6 @@ class StudentInfoModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
-
-    /**
-     * Find a user by email.
-     */
-    public function findByEmail(string $email): ?array
-    {
-        return $this->where('email', $email)->first();
-    }
-
-    public function getAllWithRoles(int $userId): ?array
-    {
-        return $this->db->table('users u')
-            ->select('u.id, u.name, u.email, u.created_at,
-                      r.name AS role_name, r.label AS role_label,
-                      s.course, s.year_level, s.section, s.student_id,
-                      s.phone, s.address, s.profile_image, s.student_display_id')
-            ->join('roles r', 'r.id = u.role_id', 'left')
-            ->join('students s', 's.student_id = u.id', 'left')
-            ->where('u.id', $userId)
-            ->where('u.deleted_at IS NULL')
-            ->get()
-            ->getRowArray();
-    }
 
     /**
      * Find a student's record by their user ID (student_id FK).
