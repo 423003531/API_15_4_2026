@@ -22,6 +22,10 @@ class AddRoleIdToUsers extends Migration
 {
     public function up(): void
     {
+        if (! $this->db->tableExists('users')) {
+            return;
+        }
+
         if (! $this->db->fieldExists('role_id', 'users')) {
             $this->forge->addColumn('users', [
                 'role_id' => [
@@ -30,7 +34,7 @@ class AddRoleIdToUsers extends Migration
                     'unsigned'   => true,
                     'null'       => true,
                     'default'    => null,
-                    'after'      => 'email',
+                    'after'      => 'role',
                 ],
             ]);
         }

@@ -33,7 +33,7 @@ class ApiAuthFilter implements FilterInterface
 
         $db  = db_connect();
         $row = $db->table('api_tokens t')
-            ->select('t.*, u.id AS user_id, u.name, u.email, r.name AS role_name')
+            ->select('t.*, u.id AS user_id, u.fullname, u.username, r.name AS role_name')
             ->join('users u', 'u.id = t.user_id')
             ->join('roles r', 'r.id = u.role_id', 'left')
             ->where('t.token', $token)

@@ -35,7 +35,7 @@ class UserModel extends ApplicationModel
 
     public function findByEmail(string $email): ?array
     {
-        return $this->where('email', $email)->first();
+        return $this->where('username', $email)->first();
     }
 
     /**
@@ -47,7 +47,7 @@ class UserModel extends ApplicationModel
         return $this->db->table('users u')
             ->select('u.*, r.name AS role_name')
             ->join('roles r', 'r.id = u.role_id', 'left')
-            ->where('u.email', $email)
+            ->where('u.username', $email)
             ->where('u.deleted_at IS NULL')
             ->get()
             ->getRowArray() ?: null;
@@ -77,14 +77,14 @@ class UserModel extends ApplicationModel
     public function getAllWithRoles(): array
     {
         return $this->db->table('users u')
-            ->select('u.id, u.name, u.email, u.created_at,
+            ->select('u.id, u.fullname, u.username, u.created_at,
                       r.name AS role_name, r.label AS role_label,
-                      s.course, s.year_level, s.section, s.student_id,
-                      s.phone, s.address, s.profile_image, s.student_display_id')
+                      s.course, s.year_level, s.section, s.id AS student_id,
+                      s.phone, s.address, s.profile_image')
             ->join('roles r', 'r.id = u.role_id', 'left')
-            ->join('students s', 's.student_id = u.id', 'left')
+            ->join('students s', 's.id = u.id', 'left')
             ->where('u.deleted_at IS NULL')
-            ->orderBy('u.name', 'ASC')
+            ->orderBy('u.fullname', 'ASC')
             ->get()
             ->getResultArray();
     }
@@ -100,15 +100,15 @@ class UserModel extends ApplicationModel
     public function getStudents(): array
     {
         return $this->db->table('users u')
-            ->select('u.id, u.name, u.email, u.created_at,
+            ->select('r.id, r.name, u.username, u.created_at,
                       r.name AS role_name, r.label AS role_label,
-                      s.course, s.year_level, s.section, s.student_id,
-                      s.phone, s.address, s.profile_image, s.student_display_id')
+                      s.course, s.year_level, s.section, s.id,
+                      s.phone, s.address')
             ->join('roles r', 'r.id = u.role_id', 'left')
-            ->join('students s', 's.student_id = u.id', 'left')
+            ->join('students s', 's.id = u.id', 'left')
             ->where('u.deleted_at IS NULL')
             ->where('r.name', 'student')
-            ->orderBy('u.name', 'ASC')
+            ->orderBy('r.name', 'ASC')
             ->get()
             ->getResultArray();
     }
@@ -120,12 +120,12 @@ class UserModel extends ApplicationModel
     public function getStudentById(int $id): ?array
     {
         return $this->db->table('users u')
-            ->select('u.id, u.name, u.email, u.created_at,
+            ->select('r.id, s.name, u.username, u.created_at,
                       r.name AS role_name, r.label AS role_label,
-                      s.course, s.year_level, s.section, s.student_id,
-                      s.phone, s.address, s.profile_image, s.student_display_id')
+                      s.course, s.year_level, s.section, s.id,
+                      s.phone, s.address')
             ->join('roles r', 'r.id = u.role_id', 'left')
-            ->join('students s', 's.student_id = u.id', 'left')
+            ->join('students s', 's.id = u.id', 'left')
             ->where('u.id', $id)
             ->where('u.deleted_at IS NULL')
             ->get()

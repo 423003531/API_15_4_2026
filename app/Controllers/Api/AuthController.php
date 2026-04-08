@@ -48,8 +48,8 @@ class AuthController extends BaseApiController
             'expires_at' => $expiresAt,
             'user'       => [
                 'id'    => $user['id'],
-                'name'  => $user['name'],
-                'email' => $user['email'],
+                'name'  => $user['fullname'],
+                'email' => $user['username'],
             ],
         ], 'Token issued.');
     }
