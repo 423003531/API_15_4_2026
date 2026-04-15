@@ -20,21 +20,7 @@ use App\Filters\ApiAuthFilter;
 
 class Filters extends BaseConfig
 {
-    /**
-     * Filter aliases.
-     *
-     * The key is the alias used in Routes.php.
-     * The value is the fully-qualified class name.
-     *
-     * Naming convention:
-     *  'auth'    → must be logged in (any role)
-     *  'student' → must be logged in AND have role = 'student'
-     *  'teacher' → must be logged in AND have role IN ['teacher','admin']
-     *  'admin'   → must be logged in AND have role = 'admin'
-     *
-     * In Routes.php, filters are stacked:
-     *   ['filter' => 'auth|student']  means BOTH filters run in order.
-     */
+   
     public array $aliases = [
         'csrf'          => CSRF::class,
         'toolbar'       => DebugToolbar::class,
@@ -49,7 +35,8 @@ class Filters extends BaseConfig
         'admin'    => AdminFilter::class,
 
         // API Bearer-token filter
-        'api_auth' => ApiAuthFilter::class,
+        'api_auth'  => ApiAuthFilter::class,
+        'cat_admin' => \App\Filters\CatAdminFilter::class,
     ];
 
     public array $required = [
